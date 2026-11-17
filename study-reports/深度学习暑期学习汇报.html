@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>汇报</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','PingFang SC','Microsoft YaHei','Helvetica Neue',sans-serif;background:#f5f6fa;color:#2d3436;overflow:hidden;height:100vh;width:100vw}
+.slides-wrapper{position:relative;width:100vw;height:100vh;overflow:hidden;display:flex;flex-direction:column}
+.slide{position:absolute;top:0;left:0;width:100%;height:100%;padding:44px 64px;overflow-y:auto;opacity:0;visibility:hidden;transition:opacity .4s ease,transform .4s ease;transform:scale(.96);background:#fff}
+.slide.active{opacity:1;visibility:visible;transform:scale(1);z-index:10}
+.slide h1{font-size:2.4rem;font-weight:700;color:#1a1a2e;margin-bottom:6px}
+.slide p,.slide li{font-size:.98rem;line-height:1.6;color:#444;margin-bottom:5px}
+.slide ul,.slide ol{padding-left:20px;margin:3px 0 8px 0}
+.subtitle{font-size:1.05rem;color:#636e72;margin-top:-2px;margin-bottom:12px}
+.highlight-box{background:#f0f7ff;border:1px solid #d0e4f5;border-radius:8px;padding:12px 18px;margin:8px 0}
+.exp-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.88rem}
+.exp-table th{background:#f0f4f8;padding:6px 10px;text-align:left;font-weight:600;border-bottom:2px solid #d0d7de}
+.exp-table td{padding:5px 10px;border-bottom:1px solid #e8ecf0;color:#444}
+.result-bad{color:#e74c3c;font-weight:600}
+.result-good{color:#27ae60;font-weight:600}
+.image-card{background:#fafbfc;border:1px solid #e0e4e8;border-radius:6px;overflow:hidden}
+.image-card img{width:100%;display:block}
+.image-card .caption{padding:3px 8px;font-size:.78rem;color:#636e72;text-align:center}
+.flex-row{display:flex;gap:14px}
+.flex-col{flex:1;min-width:0}
+.img-row2{display:flex;gap:8px}
+.cover{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(135deg,#f0f4ff,#e8f0fe 50%,#f5f0ff)}
+.cover h1{font-size:3.2rem;margin-bottom:8px;color:#1a1a2e}
+.cover .sub{font-size:1.2rem;color:#636e72}
+.nav-bar{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);padding:6px 16px;border-radius:36px;border:1px solid #d0d7de;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.nav-btn{background:#f0f4f8;border:1px solid #d0d7de;color:#555;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:1rem;transition:all .2s;display:flex;align-items:center;justify-content:center}
+.nav-btn:hover{background:#0984e3;color:#fff;border-color:#0984e3}
+.nav-indicator{font-size:.82rem;color:#888;min-width:65px;text-align:center}
+.slide-progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,#0984e3,#6c5ce7);transition:width .4s ease;z-index:200}
+.section-label{background:#f0f4f8;padding:3px 10px;border-radius:4px;font-size:.82rem;font-weight:600;color:#555;display:inline-block;margin-bottom:4px}
+.method-tag{display:inline-block;padding:2px 10px;border-radius:14px;font-size:.78rem;font-weight:500;margin:1px 3px}
+.tag-blue{background:#dbeafe;color:#1e40af;border:1px solid #93c5fd}
+.tag-green{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.tag-orange{background:#fef3c7;color:#92400e;border:1px solid #fcd34d}
+.tag-purple{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+.tag-red{background:#fce4ec;color:#b71c1c;border:1px solid #ef9a9a}
+@media(max-width:900px){.slide{padding:24px}.slide h1{font-size:1.8rem}.cover h1{font-size:2.2rem}.flex-row{flex-direction:column}.img-row2{flex-direction:column}}
+</style></head>
+<body>
+<div class="slide-progress" id="progress"></div>
+<div class="slides-wrapper" id="slidesWrapper">
+<div class="slide cover active" data-index="0">
+    <h1>深度学习暮期学习汇报</h1>
+    <div class="sub">模型独立学习方式 · 序列模型 · 无监督学习 · 图神经网络</div>
+</div><div class="slide" data-index="1">
+    <h1>总览</h1>
+    <div style="display:flex;flex-direction:column;gap:16px;margin-top:14px;">
+        <div class="highlight-box" style="margin:0;">
+            <h4 style="margin:0 0 4px 0;font-size:1.2rem;">📗 第6章：RNN与序列模型</h4>
+            <p style="margin:0;">RNN/LSTM/GRU学习→Seq2Seq→Transformer→BERT→AWD-LSTM三大语言模型→股票预测→CNN+RNN</p>
+        </div>
+        <div class="highlight-box" style="margin:0;">
+            <h4 style="margin:0 0 4px 0;font-size:1.2rem;">📕 第9章：图神经网络</h4>
+            <p style="margin:0;">图数据基础、消息传递、GCN/GAT等理论 + VGA-Net血管分割实战</p>
+        </div>
+        <div class="highlight-box" style="margin:0;">
+            <h4 style="margin:0 0 4px 0;font-size:1.2rem;">📙 第10章：无监督学习</h4>
+            <p style="margin:0;">PCA、稀疏编码、自编码器、概率密度估计、聚类、自监督学习</p>
+        </div>
+        <div class="highlight-box" style="margin:0;">
+            <h4 style="margin:0 0 4px 0;font-size:1.2rem;">📘 第11章：模型独立学习方式</h4>
+            <p style="margin:0;">8种训练范式+CV实验：集成、半监督、多任务、迁移、持续学习、域适应、MAML、增量蒸馏</p>
+        </div>
+    </div>
+</div><div class="slide" data-index="2">
+    <h1>第6章：RNN与序列模型</h1>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <div class="highlight-box" style="margin:0;">
+            <h4 style="margin:0 0 3px 0;">🧠 RNN核心理论</h4>
+            <p style="margin:0;font-size:.92rem;">
+            <strong>为什么需要RNN？</strong> 全连接网络和CNN假设输入独立，无法处理时序依赖。RNN通过隐藏层的循环连接使网络具有“记忆”能力。<br><br>
+            <strong>记忆机制</strong>：隐藏状态 hₜ 同时依赖当前输入 xₜ 和上一时刻隐藏状态 hₜ₋₁。<br><br>
+            <strong>梯度问题</strong>：BPTT时梯度连乘导致消失或爆炸。<br><br>
+            <strong>LSTM</strong>：遗忘门/输入门/输出门/细胞状态。<strong>GRU</strong>：更新门+重置门，参数更少。
+            </p>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <div class="highlight-box" style="margin:0;flex:1;">
+                <h4 style="margin:0 0 3px 0;">📖 学习内容（Notebook 250~265）</h4>
+                <p style="margin:0;font-size:.85rem;">API实现RNN→GRU/LSTM→深层/双向RNN→Seq2Seq→注意力→Transformer→BERT预训练+微调</p>
+            </div>
+            <div class="highlight-box" style="margin:0;flex:1;">
+                <h4 style="margin:0 0 3px 0;">⚡ 实践项目</h4>
+                <p style="margin:0;font-size:.85rem;">AWD-LSTM三大语言模型+Flask部署 | 股票预测 | CNN+LSTM CIFAR-10</p>
+            </div>
+        </div>
+    </div>
+</div><div class="slide" data-index="3" style="display:flex;flex-direction:column;">
+    <h1>第6章（续）：AWD-LSTM + 股票预测</h1>
+    <p class="subtitle">三个独立语言模型 + Flask部署 + 时序预测实战</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">🎭 英语笑话生成</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;"><a href="https://www.kaggle.com/abhinavmoudgil95/short-jokes" target="_blank" style="color:#0984e3;">Kaggle Short Jokes</a> 231,656条<br>3层LSTM 32.2M参数 | PPL 235.6→<span class="result-good">56.63</span></p>
+            <ul style="font-size:.78rem;">
+                <li>Epoch2: "To make up" (不连贯)</li>
+                <li>Epoch13: "To get to the other side"</li>
+                <li>Epoch44: "Ground beef" (黑色幽默)</li>
+                <li>Epoch59: "Still no eye deer" (双关语)</li>
+            </ul>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">📜 中文诗歌 + Flask部署</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;"><a href="https://github.com/chinese-poetry/chinese-poetry" target="_blank" style="color:#0984e3;">chinese-poetry-master</a> 142.6万行<br>3层LSTM 500→1500 | poetry_all.pt(158MB)</p>
+            <ul style="font-size:.78rem;">
+                <li>春眠不觉晓，画堂深峰暗寒鱼。</li>
+                <li>大江东去，凭平咫尺，松双沈沈龙引。</li>
+                <li>关关雌鸾子，怎生得怎生的星辰？</li>
+            </ul>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">📊 股票预测三模型对比</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;"><a href="https://github.com/kiangkiangkiang/chinese-stock-dataset" target="_blank" style="color:#0984e3;">chinese-stock-dataset</a></p>
+            <table class="exp-table">
+                <tr><th>模型</th><th>R²</th><th>RMSE</th></tr>
+                <tr><td>AWD-LSTM</td><td class="result-good">0.964</td><td>47.95</td></tr>
+                <tr><td><strong>LSTNet</strong></td><td class="result-good"><strong>0.972</strong></td><td>42.46</td></tr>
+                <tr><td>xLSTM</td><td>0.706</td><td>137.48</td></tr>
+            </table>
+        </div>
+    
+            <div class="img-row2" style="flex:none;gap:6px;margin-top:6px;">
+                <div class="image-card" style="flex:1;max-height:120px;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/stock_rnn_experiments/outputs/exp2_lstnet/2_predictions.png" alt="LSTNet" style="width:100%;height:120px;object-fit:contain;"><div class="caption">LSTNet预测</div></div>
+                <div class="image-card" style="flex:1;max-height:120px;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/stock_rnn_experiments/outputs/overlay_predictions.png" alt="叠加" style="width:100%;height:120px;object-fit:contain;"><div class="caption">三模型叠加</div></div>
+            </div>
+        </div>
+    </div>
+</div><div class="slide" data-index="4" style="display:flex;flex-direction:column;">
+    <h1>第6章（续）：CNN+RNN混合架构</h1>
+    <p class="subtitle">CIFAR-10图像分类</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">CNN+LSTM CIFAR-10</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;">VGG-CNN+LSTM Top-1 <span class="result-good">92.05%</span> 2.99M参数</p>
+            <div class="img-row2" style="flex:1;">
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cnn_lstm_cifar/outputs/single_cnn_lstm_c10/acc_curve.png" alt="acc" style="width:100%;height:200px;object-fit:contain;"><div class="caption">准确率曲线</div></div>
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cnn_lstm_cifar/outputs/single_cnn_lstm_c10/test_results/sample_predictions.png" alt="sample" style="width:100%;height:200px;object-fit:contain;"><div class="caption">预测对比</div></div>
+            </div>
+            <div class="img-row2" style="flex:none;gap:6px;margin-top:4px;">
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cnn_lstm_cifar/outputs/single_cnn_lstm_c10/loss_curve.png" alt="loss" style="width:100%;height:200px;object-fit:contain;"><div class="caption">损失曲线</div></div>
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/cnn_lstm_cifar/outputs/single_cnn_lstm_c10/test_results/per_class_metrics.png" alt="per" style="width:100%;height:200px;object-fit:contain;"><div class="caption">各类别F1</div></div>
+            </div>
+        </div>
+    </div>
+</div><div class="slide" data-index="5">
+    <h1>第9章：图神经网络</h1>
+    <p class="subtitle">教材第9章理论学习</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col">
+            <div class="section-label">📖 理论学习要点</div>
+            <ul><li><strong>图数据基础</strong>：邻接矩阵、拉普拉斯矩阵</li><li><strong>消息传递</strong>：聚合邻居信息更新节点表示</li><li><strong>GCN</strong>：对称正规化邻域加权平均</li><li><strong>GraphSAGE</strong>：邻居采样后聚合</li><li><strong>GAT</strong>：注意力加权聚合</li><li><strong>GIN</strong>：求和聚合(最强表达)</li><li><strong>ChebNet</strong>：Chebyshev近似谱卷积</li><li><strong>共性问题</strong>：过度平滑、压缩、可扩展</li></ul>
+        </div>
+        <div class="flex-col">
+            <div class="section-label">🏥 VGA-Net实战</div>
+            <p style="font-size:.85rem;color:#666;"><strong>VGA-Net</strong>：Vessel Graph based Attentional U-Net<br>图构建(16x16)→VGG-16→GAT→HDC+AB-FFM<br>DRIVE眼底血管数据集</p>
+            <p style="font-size:.85rem;">✅ 训练完成 | ✅ 多版本实验(v1/v2/v3+BeerLaNet)</p>
+        </div>
+    </div>
+</div><div class="slide" data-index="6">
+    <h1>第9章（续）：VGA-Net 血管分割实测结果</h1>
+    <p class="subtitle">RITE数据集 VGA-Net v3 实际测试结果</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">VGA-Net v3曲线</div>
+            <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/curves.png" style="height:100%;object-fit:contain;"><div class="caption">训练损失曲线</div></div>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">测试结果(含Dice)</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;">
+                <div class="image-card" style="width:calc(33% - 3px);"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/final_test/per_image/01_dice0.677.png"><div class="caption">0.677</div></div>
+                <div class="image-card" style="width:calc(33% - 3px);"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/final_test/per_image/02_dice0.729.png"><div class="caption">0.729</div></div>
+                <div class="image-card" style="width:calc(33% - 3px);"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/final_test/per_image/03_dice0.693.png"><div class="caption">0.693</div></div>
+                <div class="image-card" style="width:calc(33% - 3px);"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/final_test/per_image/04_dice0.706.png"><div class="caption">0.706</div></div>
+                <div class="image-card" style="width:calc(33% - 3px);"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/final_test/per_image/05_dice0.697.png"><div class="caption">0.697</div></div>
+                <div class="image-card" style="width:calc(33% - 3px);"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/_Data/RITE/results_vga_v3/final_test/per_image/06_dice0.684.png"><div class="caption">0.684</div></div>
+            </div>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">BeerLaNet曲线</div>
+            <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/%E5%9B%BE%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/VGA-Net-main/results_beerla/training_curves.png" style="height:100%;object-fit:contain;"><div class="caption">DRIVE训练曲线</div></div>
+        </div>
+    </div>
+</div><div class="slide" data-index="7">
+    <h1>第10章：无监督学习</h1>
+    <p class="subtitle">教材第10章</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col">
+            <div class="section-label">经典特征学习</div>
+            <ul><li><strong>PCA</strong>：协方差特征分解，最大方差投影降维</li><li><strong>稀疏编码</strong>：过完备基+L1稀疏约束</li><li><strong>自编码器(AE)</strong>：编码-解码重构瓶颈表示</li><li><strong>SAE/堆叠/降噪AE</strong></li></ul>
+        </div>
+        <div class="flex-col">
+            <div class="section-label">密度估计 + 聚类</div>
+            <ul><li><strong>参数方法</strong>：MLE(高斯/多项式)</li><li><strong>非参数</strong>：直方图、KDE、KNN</li><li><strong>K-Means</strong>：迭代优化+k-means++</li><li><strong>评价</strong>：轮廓系数/NMI/ARI</li></ul>
+        </div>
+        <div class="flex-col">
+            <div class="section-label">自监督学习(重点)</div>
+            <ul><li><strong>Next-Token Prediction</strong>：GPT/LLaMA</li><li><strong>掩码建模</strong>：BERT/MAE</li><li><strong>对比学习</strong>：SimCLR/MoCo/BYOL</li><li><strong>I-JEPA</strong>：抽象表示空间预测</li><li><strong>多模态</strong>：CLIP</li><li><strong>Scaling Law</strong></li></ul>
+        </div>
+    </div>
+</div><div class="slide" data-index="8">
+    <h1>第11章：模型独立学习方式</h1>
+    <p class="subtitle">8种训练范式理论基础</p>
+    <table class="exp-table">
+        <tr><th>方法</th><th>理论要点</th><th>实验验证</th><th>体会</th></tr>
+        <tr><td><span class="method-tag tag-blue">Bagging</span></td><td>Bootstrap多模型投票</td><td>5×ResNet-18 CIFAR-10</td><td>软投票更优</td></tr>
+        <tr><td><span class="method-tag tag-green">半监督</span></td><td>伪标签迭代</td><td>500标签 CIFAR-10</td><td class="result-bad">确认偏差</td></tr>
+        <tr><td><span class="method-tag tag-orange">多任务</span></td><td>共享编码器</td><td>分类+布局</td><td>λ控制偏向</td></tr>
+        <tr><td><span class="method-tag tag-purple">迁移学习</span></td><td>预训练+适配</td><td>4策略对比</td><td><strong>LoRA仅1.4%参数</strong></td></tr>
+        <tr><td><span class="method-tag tag-red">持续学习</span></td><td>Fisher约束</td><td>Split CIFAR-100</td><td>回放>微调</td></tr>
+        <tr><td><span class="method-tag tag-blue">域适应</span></td><td>GRL对抗</td><td>U-Net+DANN</td><td><strong>Dice 1.0→0.09</strong></td></tr>
+        <tr><td><span class="method-tag tag-green">MAML</span></td><td>快速适应初始化</td><td>5-way CIFAR-100</td><td><strong>步数匹配效应</strong></td></tr>
+        <tr><td><span class="method-tag tag-orange">增量蒸馏</span></td><td>KL散度防遗忘</td><td>合成分割10类</td><td>LwF保旧伤新</td></tr>
+    </table>
+</div><div class="slide" data-index="9" style="display:flex;flex-direction:column;">
+    <h1>实验展示（一）</h1>
+    <p class="subtitle">Bagging + 域适应 + MAML</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">exp1:Bagging集成 (CIFAR-10)</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;">5×ResNet-18 + Bootstrap</p>
+            <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp1/ensemble_results.png" style="height:100%;object-fit:contain;"><div class="caption">策略对比+规模曲线+t-SNE</div></div>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">exp6:域适应 (合成血管)</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;">U-Net+GRL</p>
+            <div class="img-row2" style="flex:none;"><div class="image-card"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/outputs/exp6/domain_samples.png"><div class="caption">源域vs目标域</div></div><div class="image-card"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/outputs/exp6/dice_comparison.png"><div class="caption">Dice对比</div></div></div>
+            <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/outputs/exp6/segmentation_comparison.png" style="height:100%;object-fit:contain;"><div class="caption">分割对比</div></div>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">exp7:MAML小样本 (CIFAR-100)</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;">Conv-4+FOMAML 5-way</p>
+            <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp7/accuracy_bar_chart.png" style="height:100%;object-fit:contain;"><div class="caption">1-shot vs 5-shot</div></div>
+        </div>
+    </div>
+</div><div class="slide" data-index="10" style="display:flex;flex-direction:column;">
+    <h1>实验展示（二）</h1>
+    <p class="subtitle">持续学习EWC + 增量分割蒸馏</p>
+    <div class="flex-row" style="flex:1;align-items:stretch;min-height:0;">
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">exp5:持续学习 (Split CIFAR-100)</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;">5任务×20类</p>
+            <div class="img-row2" style="flex:1;">
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp5/accuracy_matrix_finetune.png" style="width:100%;height:100%;object-fit:contain;"><div class="caption">FT灾难性遗忘</div></div>
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp5/accuracy_matrix_rehearsal.png" style="width:100%;height:100%;object-fit:contain;"><div class="caption">Rehearsal保护</div></div>
+            </div>
+        </div>
+        <div class="flex-col" style="display:flex;flex-direction:column;">
+            <div class="section-label">exp8:增量蒸馏 (合成几何形状)</div>
+            <p style="font-size:.82rem;color:#666;margin-bottom:2px;">10形状分2组依次学习</p>
+            <div class="img-row2" style="flex:1;">
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp8/forgetting_rate.png" style="width:100%;height:100%;object-fit:contain;"><div class="caption">FT全忘 LwF保持</div></div>
+                <div class="image-card" style="flex:1;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp8/seg_visualization.png" style="width:100%;height:100%;object-fit:contain;"><div class="caption">FT旧类丢失</div></div>
+            </div>
+            <div class="image-card" style="flex:none;margin-top:2px;"><img src="file:///D:/%E5%A4%A7%E4%B8%89%E4%B8%8A%E7%9A%84%E8%B5%84%E6%96%99/%E5%81%87%E6%9C%9F%E5%AD%A6%E4%B9%A0%E8%AE%B0%E5%BD%95/CV%E5%AE%9E%E9%AA%8C/outputs/exp8/iou_vs_epochs.png" style="width:100%;display:block;"><div class="caption">LwF旧类保持高位 FT断崖下降</div></div>
+        </div>
+    </div>
+</div><div class="slide cover" data-index="11" style="background:linear-gradient(135deg,#f8f9ff,#eef2f7 50%,#f0ecf9);">
+    <h1>感谢聊听</h1>
+    <div class="sub" style="margin-top:12px;">深度学习暮期学习成果汇报</div>
+</div>
+</div>
+<div class="nav-bar">
+    <button class="nav-btn" onclick="goSlide(-1)">&#9664;</button>
+    <span class="nav-indicator" id="slideIndicator">1 / 12</span>
+    <button class="nav-btn" onclick="goSlide(1)">&#9654;</button>
+    <button class="nav-btn" onclick="goSlide(0)" style="margin-left:6px;">&#127968;</button>
+    <button class="nav-btn" onclick="toggleFullscreen()">&#9931;</button>
+</div>
+<script>
+var c=0,s=document.querySelectorAll('.slide'),t=s.length,p=document.getElementById('progress');
+function show(i){s.forEach(function(x,j){x.classList.toggle('active',j===i)});document.getElementById('slideIndicator').textContent=(i+1)+'/'+t;p.style.width=((i+1)/t*100)+'%';c=i;}
+function go(d){var i=c+d;if(i<0)i=0;if(i>=t)i=t-1;show(i);}
+function tf(){if(!document.fullscreenElement)document.documentElement.requestFullscreen();else document.exitFullscreen();}
+document.addEventListener('keydown',function(e){if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' '){e.preventDefault();go(1);}else if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();go(-1);}else if(e.key==='Home'){e.preventDefault();show(0);}else if(e.key==='End'){e.preventDefault();show(t-1);}else if(e.key==='f'||e.key==='F'){tf();}});
+var tx=0;document.addEventListener('touchstart',function(e){tx=e.changedTouches[0].screenX});document.addEventListener('touchend',function(e){var d=tx-e.changedTouches[0].screenX;if(Math.abs(d)>50)go(d>0?1:-1)});
+document.addEventListener('wheel',function(e){if(e.deltaY>0)go(1);else go(-1)},{passive:true});
+show(0);
+</script>
+</body>
+</html>

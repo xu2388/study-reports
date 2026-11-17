@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>概率图模型 · 学习汇报</title>
+<style>
+  :root {
+    --ink: #1c2333;
+    --ink-soft: #4a5570;
+    --bg: #f6f8fc;
+    --card: #ffffff;
+    --line: #e2e7f2;
+    --accent: #3456c9;
+    --accent-deep: #1f3a8a;
+    --teal: #0e7490;
+    --shadow: 0 8px 28px rgba(31, 58, 138, .10);
+    --shadow-sm: 0 3px 12px rgba(31, 58, 138, .06);
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .deck { position: fixed; inset: 0; }
+
+  /* ---------- Slide ---------- */
+  .slide {
+    position: absolute; inset: 0;
+    padding: 60px 7vw 70px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    opacity: 0; visibility: hidden;
+    transform: translateX(40px) scale(.988);
+    transition: opacity .5s ease, transform .5s ease, visibility .5s;
+    background: linear-gradient(180deg, #fbfcfe 0%, var(--bg) 100%);
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: none; }
+
+  .slide-inner { max-width: 1160px; margin: 0 auto; width: 100%;
+    display: flex; flex-direction: column; flex: 1; }
+
+  /* ---------- Header ---------- */
+  .kicker {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 13px; letter-spacing: .14em; font-weight: 700;
+    color: var(--accent-deep); margin-bottom: 12px;
+  }
+  .kicker::before { content: ""; width: 30px; height: 3px; border-radius: 2px; background: var(--accent); }
+  h1.slide-title { font-size: clamp(26px, 3.2vw, 40px); line-height: 1.3; font-weight: 800;
+    letter-spacing: .005em; margin-bottom: 8px; color: var(--ink); }
+  .slide-sub { font-size: 15px; color: var(--ink-soft); margin-bottom: 20px; max-width: 920px; line-height: 1.65; }
+
+  /* ---------- Content ---------- */
+  .body-wrap { display: flex; flex-direction: column; flex: 1; gap: 16px; justify-content: center; }
+  .cards { display: grid; gap: 14px; }
+  .cards.cols-2 { grid-template-columns: 1fr 1fr; }
+  .cards.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cards.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px 20px;
+    box-shadow: var(--shadow-sm);
+  }
+  .card h3 { font-size: 16px; margin-bottom: 10px; color: var(--ink);
+    display: flex; align-items: center; gap: 9px; font-weight: 700; }
+  .card h3 .bar { width: 4px; height: 16px; border-radius: 2px; background: var(--accent); flex: none; }
+  .card p, .card li { font-size: 13.5px; line-height: 1.7; color: var(--ink-soft); }
+  .card ul { list-style: none; }
+  .card ul li { position: relative; padding-left: 16px; margin-top: 5px; }
+  .card ul li::before { content: "–"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
+  .card b { color: var(--ink); }
+
+  .highlight {
+    background: #fff; border: 1px solid var(--line); border-left: 4px solid var(--accent);
+    border-radius: 8px; padding: 14px 18px;
+    font-size: 14px; line-height: 1.7; color: var(--ink);
+    box-shadow: var(--shadow-sm);
+  }
+  .highlight b { color: var(--accent-deep); }
+
+  .formula {
+    font-family: "Cambria Math", "Times New Roman", serif;
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 14px; text-align: center;
+    font-size: 17px; color: var(--ink); margin-top: 8px;
+  }
+
+  /* ---------- Images ---------- */
+  .img-frame { background: #fff; border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+  .img-frame img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .img-cap { font-size: 11.5px; color: var(--ink-soft); text-align: center; margin-top: 6px; }
+  .svg-fig { background: #fff; border: 1px solid var(--line); border-radius: var(--radius);
+    box-shadow: var(--shadow-sm); padding: 16px 12px 12px; display: flex; flex-direction: column;
+    align-items: center; gap: 8px; }
+  .svg-row { display: flex; gap: 20px; align-items: center; justify-content: center; }
+  .svg-g { display: flex; flex-direction: column; align-items: center; gap: 5px;
+    font-size: 12px; color: var(--ink-soft); }
+  .svg-g svg { width: 168px; height: 186px; }
+  .split { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; align-items: center; flex: 1; }
+  .two-imgs { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: center; }
+
+  /* ---------- PGM 版块：概率图模型 ---------- */
+  .pgm-cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .pgm-col { background: var(--card); border: 1px solid var(--line); border-top: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 18px 16px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 10px; }
+  .pgm-col.teal { border-top-color: var(--teal); }
+  .pgm-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .pgm-badge { font-size: 12px; font-weight: 800; color: #fff; background: var(--accent); padding: 3px 12px; border-radius: 999px; letter-spacing: .03em; white-space: nowrap; flex: none; }
+  .pgm-col.teal .pgm-badge { background: var(--teal); }
+  .pgm-name { font-size: 13px; color: var(--ink-soft); font-weight: 600; }
+  .pgm-formula { font-family: "Cambria Math", "Times New Roman", serif; background: #f2f6ff; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; text-align: center; font-size: 15px; color: var(--ink); }
+  .pgm-fig { display: flex; justify-content: center; }
+  .pgm-fig svg { height: 122px; width: auto; }
+  .pgm-col ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+  .pgm-col ul li { position: relative; padding-left: 17px; font-size: 13px; line-height: 1.6; color: var(--ink-soft); }
+  .pgm-col ul li::before { content: "–"; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
+  .pgm-col.teal ul li::before { color: var(--teal); }
+  .pgm-col ul li.num { padding-left: 0; }
+  .pgm-col ul li.num::before { content: none; }
+  .pgm-col b { color: var(--ink); }
+  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11.5px; font-weight: 700; margin-right: 7px; flex: none; vertical-align: middle; }
+  .pgm-col.teal .step-num { background: var(--teal); }
+  .pgm-strip { display: flex; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--line); border-top: 3px solid #b0403a; border-radius: var(--radius); padding: 12px 18px; box-shadow: var(--shadow-sm); }
+  .pgm-strip .pgm-items { display: flex; gap: 22px; flex-wrap: wrap; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .pgm-strip .pgm-items b { color: var(--ink); }
+  .flow { display: flex; gap: 10px; }
+  .flow-step { flex: 1; background: #f2f6ff; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; text-align: center; font-size: 12.5px; color: var(--ink-soft); position: relative; }
+  .flow-step + .flow-step::before { content: "→"; position: absolute; left: -8px; top: 50%; transform: translateY(-50%); color: var(--teal); font-weight: 700; font-size: 13px; }
+  .flow-step b { display: block; color: var(--accent-deep); font-size: 12.5px; margin-bottom: 2px; }
+
+  /* ---------- Cover ---------- */
+  .cover { background: linear-gradient(135deg, #16203f 0%, #1f3a8a 60%, #2c56b8 100%); color: #fff; }
+  .cover .slide-inner { justify-content: center; align-items: center; text-align: center; }
+  .cover-rule { width: 64px; height: 3px; background: #8fb0ff; border-radius: 2px; margin: 22px auto; }
+  .cover h1 { font-size: clamp(38px, 5.6vw, 68px); font-weight: 900; letter-spacing: .02em; line-height: 1.15; }
+  .cover-sub { margin-top: 14px; font-size: 18px; color: #d3ddff; font-weight: 400; letter-spacing: .06em; }
+  .cover-meta { margin-top: 40px; display: flex; gap: 44px; flex-wrap: wrap; justify-content: center; }
+  .cover-meta .m { font-size: 13.5px; color: #aebcf2; display: flex; align-items: center; gap: 8px; letter-spacing: .04em; }
+  .cover-meta .m b { color: #eef2ff; font-weight: 700; }
+  .cover-top { font-size: 12.5px; letter-spacing: .3em; color: #9fb0e8; margin-bottom: 26px; font-weight: 600; }
+  .cover-badge { font-size: 14px; letter-spacing: .42em; text-indent: .42em; font-weight: 700;
+    color: #cdd8ff; border: 1px solid rgba(205,216,255,.4); background: rgba(255,255,255,.06);
+    padding: 10px 28px; border-radius: 999px; margin-bottom: 34px; }
+  .cover-word { font-size: clamp(46px, 8vw, 100px); font-weight: 900;
+    letter-spacing: .18em; text-indent: .18em; line-height: 1.1; color: #fff;
+    text-shadow: 0 6px 40px rgba(0,0,0,.35); }
+
+  /* ---------- Overview ---------- */
+  body.overview .deck { overflow: auto; padding: 40px; display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; align-content: start; }
+  body.overview .slide { position: relative; inset: auto; transform: none; opacity: 1; visibility: visible;
+    height: 210px; padding: 20px; background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    box-shadow: var(--shadow-sm); cursor: pointer; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+  body.overview .slide:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  body.overview .slide .kicker { font-size: 10px; margin-bottom: 6px; }
+  body.overview .slide h1.slide-title { font-size: 17px; }
+  body.overview .slide .slide-sub, body.overview .slide .body-wrap { display: none; }
+
+  /* ---------- HUD ---------- */
+  .progress { position: fixed; top: 0; left: 0; height: 3px; width: 100%; z-index: 40; background: rgba(0,0,0,.05); }
+  .progress i { display: block; height: 100%; width: 0%; background: var(--accent); transition: width .35s ease; }
+  .counter { position: fixed; bottom: 18px; right: 24px; z-index: 40;
+    font-size: 12.5px; color: var(--ink-soft); font-weight: 600; letter-spacing: .08em;
+    background: rgba(255,255,255,.8); padding: 6px 13px; border-radius: 999px; border: 1px solid var(--line); }
+  .hint { position: fixed; bottom: 18px; left: 24px; z-index: 40;
+    font-size: 11.5px; color: #94a0bd; letter-spacing: .04em;
+    background: rgba(255,255,255,.75); padding: 6px 13px; border-radius: 999px; border: 1px solid var(--line); }
+  .nav-arrow { position: fixed; top: 50%; transform: translateY(-50%); z-index: 40;
+    width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line);
+    background: rgba(255,255,255,.85); display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--ink); font-size: 18px; box-shadow: var(--shadow-sm);
+    transition: background .2s; user-select: none; }
+  .nav-arrow:hover { background: #fff; }
+  .nav-prev { left: 16px; } .nav-next { right: 16px; }
+
+  @media (max-width: 900px) {
+    .cards.cols-3, .cards.cols-4 { grid-template-columns: 1fr 1fr; }
+    .pgm-cmp { grid-template-columns: 1fr; }
+    .split { grid-template-columns: 1fr; }
+    .nav-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress"><i id="bar"></i></div>
+
+<div class="deck" id="deck">
+
+  <!-- ============ 1. 封面 ============ -->
+  
+
+  <!-- ============ 1. 封面 ============ -->
+  <section class="slide cover active">
+    <div class="slide-inner">
+      <div class="cover-word">学习汇报</div>
+    </div>
+  </section>
+
+  <!-- ============ 2. 概率图模型 · 模型表示 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">概率图模型 · 模型表示</div>
+      <h1 class="slide-title">用图结构分解高维联合分布</h1>
+      <div class="slide-sub">图模型回答三大基本问题：<b>表示、推断、学习</b>。高维联合分布参数爆炸（2 值 100 维变量需约 10³⁰ 个参数），借助图结构把条件独立假设显式化，将联合分布拆成一族局部、可计算的因子。</div>
+      <div class="body-wrap">
+        <div class="pgm-cmp">
+          <div class="pgm-col">
+            <div class="pgm-head"><span class="pgm-badge">有向图</span><span class="pgm-name">贝叶斯网络 · DAG</span></div>
+            <div class="pgm-fig">
+              <svg viewBox="0 0 170 186">
+                <defs>
+                  <marker id="arrD" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                    <path d="M0,0 L8,4 L0,8 Z" fill="#3456c9"/>
+                  </marker>
+                </defs>
+                <line x1="85" y1="38" x2="133" y2="82" stroke="#3456c9" stroke-width="1.6" marker-end="url(#arrD)"/>
+                <line x1="85" y1="38" x2="37" y2="82" stroke="#3456c9" stroke-width="1.6" marker-end="url(#arrD)"/>
+                <line x1="133" y1="108" x2="97" y2="150" stroke="#3456c9" stroke-width="1.6" marker-end="url(#arrD)"/>
+                <line x1="37" y1="108" x2="73" y2="150" stroke="#3456c9" stroke-width="1.6" marker-end="url(#arrD)"/>
+                <circle cx="85" cy="24" r="15" fill="#fff" stroke="#1f3a8a" stroke-width="1.6"/>
+                <text x="85" y="28" text-anchor="middle" font-size="12" fill="#1f3a8a" font-style="italic" font-family="Cambria, serif">X1</text>
+                <circle cx="145" cy="94" r="15" fill="#fff" stroke="#1f3a8a" stroke-width="1.6"/>
+                <text x="145" y="98" text-anchor="middle" font-size="12" fill="#1f3a8a" font-style="italic" font-family="Cambria, serif">X2</text>
+                <circle cx="25" cy="94" r="15" fill="#fff" stroke="#1f3a8a" stroke-width="1.6"/>
+                <text x="25" y="98" text-anchor="middle" font-size="12" fill="#1f3a8a" font-style="italic" font-family="Cambria, serif">X3</text>
+                <circle cx="85" cy="162" r="15" fill="#fff" stroke="#1f3a8a" stroke-width="1.6"/>
+                <text x="85" y="166" text-anchor="middle" font-size="12" fill="#1f3a8a" font-style="italic" font-family="Cambria, serif">X4</text>
+              </svg>
+            </div>
+            <div class="pgm-formula"><i>p</i>(x) = ∏<sub>k</sub> <i>p</i>(x<sub>k</sub> | x<sub>πk</sub>)</div>
+            <ul>
+              <li>联合概率 = 各节点<b>局部条件概率</b>的连乘</li>
+              <li>条件独立判定：链式 / 分叉观测中间节点即阻断路径；汇聚结构观测后反而引入依赖（<b>解释消除</b>）→ <b>d-分离</b></li>
+              <li>局部马尔可夫性质：给定父节点，与所有非后代条件独立</li>
+              <li>典型模型：朴素贝叶斯、隐马尔可夫模型（HMM）、Sigmoid 信念网络</li>
+            </ul>
+          </div>
+          <div class="pgm-col teal">
+            <div class="pgm-head"><span class="pgm-badge">无向图</span><span class="pgm-name">马尔可夫随机场 · MRF</span></div>
+            <div class="pgm-fig">
+              <svg viewBox="0 0 170 186">
+                <line x1="85" y1="38" x2="133" y2="82" stroke="#0e7490" stroke-width="1.6"/>
+                <line x1="85" y1="38" x2="37" y2="82" stroke="#0e7490" stroke-width="1.6"/>
+                <line x1="133" y1="108" x2="97" y2="150" stroke="#0e7490" stroke-width="1.6"/>
+                <line x1="37" y1="108" x2="73" y2="150" stroke="#0e7490" stroke-width="1.6"/>
+                <circle cx="85" cy="24" r="15" fill="#fff" stroke="#0e7490" stroke-width="1.6"/>
+                <text x="85" y="28" text-anchor="middle" font-size="12" fill="#0e7490" font-style="italic" font-family="Cambria, serif">X1</text>
+                <circle cx="145" cy="94" r="15" fill="#fff" stroke="#0e7490" stroke-width="1.6"/>
+                <text x="145" y="98" text-anchor="middle" font-size="12" fill="#0e7490" font-style="italic" font-family="Cambria, serif">X2</text>
+                <circle cx="25" cy="94" r="15" fill="#fff" stroke="#0e7490" stroke-width="1.6"/>
+                <text x="25" y="98" text-anchor="middle" font-size="12" fill="#0e7490" font-style="italic" font-family="Cambria, serif">X3</text>
+                <circle cx="85" cy="162" r="15" fill="#fff" stroke="#0e7490" stroke-width="1.6"/>
+                <text x="85" y="166" text-anchor="middle" font-size="12" fill="#0e7490" font-style="italic" font-family="Cambria, serif">X4</text>
+              </svg>
+            </div>
+            <div class="pgm-formula"><i>p</i>(x) = (1/<i>Z</i>)·∏<sub>c</sub> φ<sub>c</sub>(x<sub>c</sub>)</div>
+            <ul>
+              <li>按<b>最大团</b>上的势函数分解（Hammersley–Clifford 定理）</li>
+              <li>势函数取指数形式即<b>玻尔兹曼分布</b>：φ<sub>c</sub>(x<sub>c</sub>) = exp(−E<sub>c</sub>(x<sub>c</sub>))</li>
+              <li>配分函数 <i>Z</i> 需对全空间求和（指数级）——推断与学习的关键难点</li>
+              <li>典型模型：对数线性模型（最大熵）、条件随机场（CRF）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight"><b>关键区别</b>：有向图按条件依赖逐点分解、可局部独立处理；无向图按最大团 / 势函数分解，配分函数 Z 耦合所有变量。有向 → 无向转换需<b>道德化</b>（为有共同孩子的父节点加边）。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. 概率图模型 · 推断 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">概率图模型 · 推断</div>
+      <h1 class="slide-title">推断：从精确到近似</h1>
+      <div class="slide-sub">给定部分观测变量 e，求其他变量 q 的条件概率 <i>p</i>(q | e)，核心是求边际分布；结构越复杂、变量越连续，越需要转向近似推断。</div>
+      <div class="body-wrap">
+        <div class="pgm-cmp">
+          <div class="pgm-col">
+            <div class="pgm-head"><span class="pgm-badge">精确推断</span><span class="pgm-name">树 / 无环结构</span></div>
+            <div class="pgm-formula"><i>p</i>(q | e) = Σ<sub>z</sub> <i>p</i>(q, e, z) / Σ<sub>q,z</sub> <i>p</i>(q, e, z)</div>
+            <ul>
+              <li class="num"><span class="step-num">1</span><b>变量消除法</b>：乘法分配律 + 动态规划逐个消除变量；消除顺序决定中间因子规模</li>
+              <li class="num"><span class="step-num">2</span><b>信念传播</b>（和积 / 消息传递）：消息 μ 递归计算并缓存，链上复杂度由 O(K<sup>T</sup>) 降至 O(T·K²)</li>
+              <li class="num"><span class="step-num">3</span>树结构：叶子 → 根 → 叶子<b>一轮双向传播</b>，即得所有变量的边际分布</li>
+              <li class="num"><span class="step-num">4</span>有环：<b>联合树算法</b>转换为无环图后精确推断</li>
+            </ul>
+          </div>
+          <div class="pgm-col teal">
+            <div class="pgm-head"><span class="pgm-badge">近似推断</span><span class="pgm-name">有环 / 连续 / 高维</span></div>
+            <ul>
+              <li><b>环路信念传播</b>（LBP）：在环上仍跑消息传递，不保证收敛与精确</li>
+              <li><b>变分推断</b>：用简单分布 q 逼近后验 p(z|x)，最大化 ELBO；平均场假设 + 坐标上升，<b>摊销推断 → VAE</b></li>
+              <li><b>采样法</b>：拒绝采样、重要性采样、MCMC（Metropolis–Hastings、吉布斯采样）</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight"><b>要点</b>：精确推断依赖树 / 无环结构与条件独立；一旦有环、变量连续或含高维隐变量，就转向变分或采样的近似路径。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. 概率图模型 · 学习 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">概率图模型 · 学习</div>
+      <h1 class="slide-title">学习：参数估计的两条路径</h1>
+      <div class="slide-sub">图模型学习分<b>结构学习</b>与<b>参数估计</b>（本章聚焦参数估计）：不含隐变量可直接极大似然估计；含隐变量需 EM 算法，其 E 步本质就是一次后验推断。</div>
+      <div class="body-wrap">
+        <div class="pgm-cmp">
+          <div class="pgm-col">
+            <div class="pgm-head"><span class="pgm-badge">不含隐变量</span><span class="pgm-name">直接极大似然</span></div>
+            <ul>
+              <li><b>有向图</b>：极大似然，各局部条件概率<b>独立求解</b>；离散用条件概率表，连续用高斯信念网络</li>
+              <li><b>无向图</b>：梯度 = 经验分布期望 − 模型分布期望；配分函数耦合全部参数，需采样 / 变分近似、伪似然或对比散度</li>
+            </ul>
+          </div>
+          <div class="pgm-col teal">
+            <div class="pgm-head"><span class="pgm-badge">含隐变量</span><span class="pgm-name">EM 算法</span></div>
+            <div class="pgm-formula">log <i>p</i>(x) = <b>ELBO</b> + KL(q ‖ <i>p</i>(z|x))</div>
+            <div class="flow">
+              <div class="flow-step"><b>E 步</b>固定参数，q = <i>p</i>(z | x, θ)<br>（后验推断）</div>
+              <div class="flow-step"><b>M 步</b>固定 q，最大化 ELBO<br>更新参数</div>
+              <div class="flow-step"><b>迭代</b>对数边际似然<br>单调不减</div>
+            </div>
+          </div>
+        </div>
+        <div class="pgm-strip">
+          <span class="pgm-badge">示例 · GMM</span>
+          <div class="pgm-items">
+            <span><b>隐变量 z</b>：样本由哪个高斯分量生成</span>
+            <span><b>E 步</b>：后验责任度 γ<sub>nk</sub> ∝ π<sub>k</sub>·𝒩(x<sub>n</sub>; μ<sub>k</sub>, σ<sub>k</sub>)</span>
+            <span><b>M 步</b>：按 γ<sub>nk</sub> 加权更新 π<sub>k</sub>、μ<sub>k</sub>、σ<sub>k</sub>²</span>
+          </div>
+        </div>
+        <div class="highlight"><b>与深度生成模型的联系</b>：图模型回答"联合分布分解为哪些因子"，神经网络回答"因子如何用可学习函数表示"；VAE、GAN、扩散模型与流模型等深度生成模型均可纳入这一框架。</div>
+        <div style="font-size:12.5px;color:var(--ink-soft);text-align:right">参考资料：《神经网络与深度学习》（邱锡鹏）第 14 章</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. 强化学习实践 · 六子棋 AlphaZero 训练优化 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">强化学习实践 · 六子棋 AlphaZero 训练优化</div>
+      <h1 class="slide-title">六子棋（Connect6）AlphaZero：训练逻辑优化与成果</h1>
+      <div class="slide-sub">将五子棋 AlphaZero 项目改造为六子棋，并在 8G 显存的笔记本 GPU 上完成训练效率优化、断点续训与棋力提升。</div>
+      <div class="body-wrap">
+        <div class="cards cols-2">
+          <div class="card"><h3><span class="bar"></span>方法框架</h3>
+            <ul>
+              <li>MCTS 搜索 + 双头网络（策略 π / 价值 v）</li>
+              <li>自博弈（self-play）+ 对手池 + replay buffer</li>
+              <li>8× 对称增强；胜利条件参数化（<b>--win_condition 6</b>），无需修改胜负检测代码</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar" style="background:var(--teal)"></span>模型架构：SE-ResNet</h3>
+            <ul>
+              <li>残差块 + SE（Squeeze-Excitation）通道注意力</li>
+              <li>Small：channels=64 × 8 块，约 <b>300K</b> 参数</li>
+              <li>Standard：channels=128 × 10 块，约 <b>1.5M</b> 参数</li>
+            </ul>
+          </div>
+        </div>
+        <div class="cards cols-2">
+          <div class="card"><h3><span class="bar"></span>训练效率优化（8G 显存）</h3>
+            <ul>
+              <li><b>MCTS 批量推理</b>：每个搜索迭代收集 256 个叶子节点一次性 GPU 前向，减少 GPU 调用</li>
+              <li><b>FP16 混合精度</b>：autocast + GradScaler，显存利用率显著提升</li>
+              <li>实测训练速度接近翻倍（多线程方案受 GIL 限制后回滚为串行 GPU 模式）</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar" style="background:var(--teal)"></span>工程化能力</h3>
+            <ul>
+              <li><b>断点续训</b>：checkpoint 保存模型 + 优化器 + 调度器 + AMP scaler + 训练计数</li>
+              <li>Ctrl+C 自动安全保存，重启自动恢复，训练零丢失</li>
+              <li><b>对手池注入</b>：将 Small 模型作为高 Elo 对手注入 Standard 对手池，缓解自博弈同质化</li>
+            </ul>
+          </div>
+        </div>
+        <div class="cards cols-3">
+          <div class="card" style="text-align:center">
+            <div style="font-size:26px;font-weight:800;color:var(--accent-deep)">≈ 2×</div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">训练速度提升<br>（批量 MCTS + FP16）</div>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:26px;font-weight:800;color:var(--accent-deep)">1528</div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Standard 模型 Elo 评分<br>（对随机棋手 60 局全胜）</div>
+          </div>
+          <div class="card" style="text-align:center">
+            <div style="font-size:26px;font-weight:800;color:var(--accent-deep)">1.5M</div>
+            <div style="font-size:12.5px;color:var(--ink-soft);margin-top:4px">Standard 网络参数量<br>（Small → Standard 进化）</div>
+          </div>
+        </div>
+        <div class="highlight"><b>实践要点</b>：强化学习训练管线中，工程效率（混合精度、批量推理、断点续训）与算法机制（对手池、对称增强）同等重要；在受限显存下通过算子级优化即可获得接近翻倍的训练加速。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. 深度生成模型 · 研究背景 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">深度生成模型 · 研究背景</div>
+      <h1 class="slide-title">研究背景与问题</h1>
+      <div class="slide-sub">生成模型的目标：将易于采样的初始分布（如高斯噪声）变换为符合真实数据分布的样本。</div>
+      <div class="body-wrap">
+        <div class="split">
+          <div class="left">
+            <div class="cards" style="grid-template-columns:1fr">
+              <div class="card"><h3><span class="bar" style="background:var(--teal)"></span>生成模型的统一范式</h3>
+                <ul>
+                  <li>初始分布 <i>p</i><sub>init</sub>（高斯噪声）→ 数据分布 <i>p</i><sub>data</sub></li>
+                  <li>数据分布存在但数学形式未知，仅有有限样本（数据集）</li>
+                </ul>
+              </div>
+              <div class="card"><h3><span class="bar" style="background:#b0403a"></span>连续归一化流（CNF）的训练困境</h3>
+                <ul>
+                  <li>Continuous Normalizing Flows（CNFs）最大似然训练需反复求解 ODE 并计算 Jacobian 行列式，成本过高</li>
+                  <li>网络需满足可逆性约束，限制表达能力</li>
+                </ul>
+              </div>
+              <div class="highlight"><b>核心动机</b>：以"回归条件向量场"取代最大似然推断（Lipman 等，2022, NeurIPS）。</div>
+            </div>
+          </div>
+          <div class="right">
+            <div class="img-frame" style="height:min(58vh,520px)">
+              <img src="images/pdf01_p14_generative_model.jpg" alt="A generative model converts samples from a initial distribution into samples from the data distribution">
+            </div>
+            <div class="img-cap">生成模型的统一范式：初始分布 → 数据分布（课程课件）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 7. 深度生成模型 · 核心方法 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">深度生成模型 · 核心方法</div>
+      <h1 class="slide-title">方法：条件向量场回归</h1>
+      <div class="slide-sub">针对每对（噪声、数据）构造具有解析解的条件概率路径，直接回归其向量场，实现免模拟（simulation-free）训练。</div>
+      <div class="body-wrap">
+        <div class="cards cols-3">
+          <div class="card"><h3><span class="bar"></span>条件向量场</h3>
+            <ul>
+              <li>条件路径 <i>p<sub>t</sub></i>(<i>x</i>|<i>z</i>) 的向量场存在闭式解</li>
+              <li>训练等价于监督回归（MSE），无需模拟 ODE 或计算 Jacobian</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar"></span>条件 ≡ 边缘</h3>
+            <ul>
+              <li>优化条件损失等价于优化边缘损失</li>
+              <li>以易算的条件版本逼近真正所需的边缘目标</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar" style="background:var(--teal)"></span>直线调度（CondOT）</h3>
+            <div class="formula" style="font-size:14.5px">x<sub>t</sub> = (1−t)·x<sub>0</sub> + t·z</div>
+            <ul>
+              <li>目标速度 <i>u<sub>t</sub></i> = <i>z</i> − <i>x</i><sub>0</sub>（常数）</li>
+              <li>路径更直，采样步数显著减少</li>
+            </ul>
+          </div>
+        </div>
+        <div class="two-imgs">
+          <div>
+            <div class="img-frame" style="height:min(46vh,420px)">
+              <img src="images/pdf02_p5_matrix.jpg" alt="条件与边缘路径的等价框架">
+            </div>
+            <div class="img-cap">条件与边缘路径的等价框架（课程课件）</div>
+          </div>
+          <div>
+            <div class="img-frame" style="height:min(46vh,420px)">
+              <img src="images/pdf02_p26_straight_line.jpg" alt="Straight Line Schedule">
+            </div>
+            <div class="img-cap">直线调度：噪声与数据的线性插值（课程课件）</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. 深度生成模型 · 实验结果 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">深度生成模型 · 实验结果</div>
+      <h1 class="slide-title">实验结果</h1>
+      <div class="slide-sub">原理论文与个人复现实验均验证了该方法的有效性与高效性。</div>
+      <div class="body-wrap">
+        <div class="cards cols-2">
+          <div class="card"><h3><span class="bar"></span>原始论文验证（CIFAR-10 / ImageNet）</h3>
+            <ul>
+              <li>最优传输（OT）路径在 NLL 与 FID 指标上优于 DDPM、Score Matching、ScoreFlow 等扩散基线</li>
+              <li>采样所需 NFE 由 601 降至 138；支持 64→256 超分辨率</li>
+              <li>首次将 CNFs 扩展至 ImageNet 规模训练</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar" style="background:var(--teal)"></span>复现实验</h3>
+            <ul>
+              <li>2D 点云变换：圆环→月牙、十字→IMBR（随机 vs OT 配对，OT 损失更低）</li>
+              <li>MNIST 手写数字生成：CFM 4.8M 模型 + EMA + cosine 微调，最优 val_loss ≈ 0.085，生成质量接近真实</li>
+            </ul>
+          </div>
+        </div>
+        <div class="cards cols-3">
+          <div>
+            <div class="img-frame" style="height:min(30vh,270px)">
+              <img src="images/exp1_trajectory.jpg" alt="circle to crescent">
+            </div>
+            <div class="img-cap">2D 点云变换：圆环 → 月牙</div>
+          </div>
+          <div>
+            <div class="img-frame" style="height:min(30vh,270px)">
+              <img src="images/exp3b_trajectory_ot.jpg" alt="cross to IMBR">
+            </div>
+            <div class="img-cap">2D 点云变换：十字 → IMBR（OT 配对）</div>
+          </div>
+          <div>
+            <div class="img-frame" style="height:min(55vh,480px)">
+              <img src="images/cfm_official_64_compare.png" alt="CFM MNIST 64 生成 vs GT">
+            </div>
+            <div class="img-cap">CFM MNIST 最优模型（4.8M 参数，EMA + cosine 微调）：上排 64 张生成 / 下排 64 张真实</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 9. 深度生成模型 · 应用与总结 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">深度生成模型 · 应用与总结</div>
+      <h1 class="slide-title">应用与总结</h1>
+      <div class="body-wrap">
+        <div class="cards cols-2">
+          <div class="card"><h3><span class="bar"></span>前沿应用</h3>
+            <ul>
+              <li>Meta MovieGen：视频生成模型，基于条件向量场回归方法训练</li>
+              <li>Stable Diffusion 3：文生图模型，采用相同的训练范式</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar" style="background:var(--teal)"></span>总结</h3>
+            <ul>
+              <li>将生成模型的训练由复杂的概率推断转化为监督学习</li>
+              <li>统一了扩散模型与最优传输路径，已成为主流训练范式</li>
+            </ul>
+          </div>
+        </div>
+        <div class="two-imgs" style="grid-template-columns:1.3fr 1.7fr">
+          <div>
+            <div class="img-frame" style="height:min(40vh,360px)">
+              <img src="images/pdf02_p29_moviemgen.jpg" alt="Meta MovieGen">
+            </div>
+            <div class="img-cap">Meta MovieGen 视频生成</div>
+          </div>
+          <div>
+            <div class="img-frame" style="height:min(40vh,360px)">
+              <img src="images/pdf02_p30_sd3.jpg" alt="Stable Diffusion 3">
+            </div>
+            <div class="img-cap">Stable Diffusion 3 文生图</div>
+          </div>
+        </div>
+        <div class="highlight">
+          <b>参考资料</b>：Lipman et al., <i>Flow Matching for Generative Modeling</i>（NeurIPS 2022）；
+          MIT IAP 2026 · 6.S184 课件（Lecture 1–2）；官方代码库 facebookresearch/flow_matching。
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10. CFM MNIST 复现 · 模型架构与训练流程 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">深度生成模型 · 实验实践</div>
+      <h1 class="slide-title">CFM MNIST 复现：模型架构与训练流程</h1>
+      <div class="slide-sub">基于 Pytorch-Conditional-Flow-Matching-Tutorial 复现，使用官方 4.8M 参数的 ConvBlock 残差网络，经过 150 epochs 预训练 + 50 epochs 微调，验证 Loss 降至 0.085，生成的手写数字接近真实 MNIST。</div>
+      <div class="body-wrap">
+        <div class="cards cols-2">
+          <div>
+            <div class="card"><h3><span class="bar"></span>模型架构 (ConvBlock ResNet)</h3>
+              <ul>
+                <li><b>输入</b>: [B, 1, 28, 28] 灰度图像 + 时间 t</li>
+                <li><b>主干</b>: 8 层 ConvBlock (hidden_dim=256) + 残差连接</li>
+                <li><b>核心组件</b>:
+                  <ul>
+                    <li>空洞卷积 (Dilated Conv) 扩大感受野</li>
+                    <li>GroupNorm 归一化 + SiLU 激活</li>
+                    <li>时间嵌入 (Time Embedding) 融合</li>
+                  </ul>
+                </li>
+                <li><b>输出</b>: [B, 1, 28, 28] 预测的速度场 v</li>
+              </ul>
+            </div>
+          </div>
+          <div>
+            <div class="card"><h3><span class="bar"></span>训练流程与配置</h3>
+              <ul>
+                <li><b>数据</b>: MNIST 手写数据集 (60k 训练 / 10k 测试)</li>
+                <li><b>损失函数</b>: 速度场 MSE 损失 (Mean Squared Error)</li>
+                <li><b>优化器</b>: AdamW (lr=5e-5 → 2e-5)</li>
+                <li><b>训练技巧</b>:
+                  <ul>
+                    <li>EMA (Exponential Moving Average, decay=0.999)</li>
+                    <li>CosineAnnealing 学习率调度</li>
+                    <li>断点续训 (Checkpointing)</li>
+                  </ul>
+                </li>
+                <li><b>采样</b>: Euler 积分，T=100 步</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="img-frame" style="height:min(28vh,240px)">
+          <img src="images/cfm_official_top16_compare.png" alt="CFM 最优权重 Top-16 生成">
+        </div>
+        <div class="img-cap">最终模型生成的 Top-16 样本 (上排) 与 GT 真实样本 (下排) 对比, 笔画清晰, 分类置信度均大于 0.99。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11. 扩展实验 · IMBR 图像生成 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">深度生成模型 · 扩展实验</div>
+      <h1 class="slide-title">图像生成：从点云到图像表示</h1>
+      <div class="slide-sub">将 IMBR 字母由「无序点云」改为「32×128 图像」表示，复用 MNIST 上验证成功的 CFM 训练流程（4.8M ConvBlock 残差网络 + 随机配对 + EMA）。经过 65 epochs 微调，成功从高斯噪声生成清晰的 IMBR 字母。</div>
+      <div class="body-wrap">
+        <div class="img-frame" style="height:min(40vh,340px)">
+          <img src="images/cfm_imbr_compare_16.png" alt="IMBR 生成 vs GT 对比">
+        </div>
+        <div class="img-cap">IMBR 生成对比 (上排: 16 张模型生成 / 下排: 16 张 GT 真实)</div>
+        <div class="cards cols-2">
+          <div class="card"><h3><span class="bar"></span>核心问题与解决思路</h3>
+            <ul>
+              <li><b>问题</b>: 早期尝试将字母表示为无序点云，模型难以学到平滑的笔画结构。</li>
+              <li><b>解决</b>: 将生成任务重新定义为标准的像素级图像生成任务。</li>
+              <li><b>效果</b>: 成功利用 CNN 的局部相关性优势，直接迁移 MNIST 实验的成功经验。</li>
+            </ul>
+          </div>
+          <div class="card"><h3><span class="bar"></span>实验配置</h3>
+            <ul>
+              <li><b>数据</b>: 32×128 在线渲染 IMBR 图像 (随机增强)</li>
+              <li><b>模型</b>: 复用 MNIST 的 4.8M ConvBlock 残差网络</li>
+              <li><b>训练</b>: 65 epochs, CFM Loss 0.259 → 0.040</li>
+              <li><b>验证 Loss</b>: 0.0396</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight"><b>结论</b>: 任务的数据表示至关重要。将 IMBR 生成视为图像生成任务后，标准的 CFM 训练范式即可有效工作。这验证了流匹配在通用图像生成任务上的强大潜力。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 12. 讨论与思考 · 算法融合的探讨 ============ -->
+  <section class="slide">
+    <div class="slide-inner">
+      <div class="kicker">Discussion & Future Work</div>
+      <h1 class="slide-title">A Thought on Flow Matching vs. Diffusion</h1>
+      <div class="slide-sub">Flow matching and diffusion models share core technologies and boundaries are not absolute. As we move towards real-world applications, a question arises regarding the optimization strategies.</div>
+      <div class="body-wrap">
+        <div class="cards cols-2">
+          <div class="card" style="background: #f8fafc;">
+            <h3><span class="bar"></span>Textbook Insight</h3>
+            <p style="font-size: 12px; line-height: 1.8; color: var(--ink-soft); font-style: italic;">
+              "流匹配与扩散模型之间的边界并不绝对——两者的核心技术（条件控制、无分类器引导、隐空间建模等）可以高度共享。在连续时间表述下，二者都可以理解为学习从简单分布到数据分布的动力系统。"
+            </p>
+            <div class="img-frame" style="margin-top: 10px; height: 150px; background-color: #ffffff; padding: 0;">
+              <img src="images/image.png" alt="Flow Matching Application" style="max-height: 100%; width: auto; object-fit: contain; border: 1px solid #e2e7f2;">
+            </div>
+          </div>
+          <div class="card" style="background: #f8fafc;">
+            <h3><span class="bar"></span>Our Experiment</h3>
+            <ul style="font-size: 13px;">
+              <li>Successfully reproduced CFM on MNIST and IMBR.</li>
+              <li>Found CFM efficient (fewer steps) and stable.</li>
+              <li>Data representation is crucial for success.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="highlight" style="margin-top: 10px; padding: 20px; font-size: 15px; line-height: 1.8;">
+          <b style="color: var(--accent-deep); font-size: 16px;">💡 Question for Discussion:</b><br>
+          <span style="color: var(--ink);">
+            If we have the opportunity to apply Flow Matching to solve problems in existing work, should we primarily migrate proven ideas from Diffusion models (e.g., Classifier-Free Guidance, latent space modeling), or should we focus on optimizing based on Flow Matching's own strengths (e.g., straight-line paths, efficiency)? What are your thoughts on the best hybrid approach?
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="hint">← → 翻页 · O 总览 · F 全屏</div>
+<div class="counter" id="counter">1 / 12</div>
+<div class="nav-arrow nav-prev" id="prev">‹</div>
+<div class="nav-arrow nav-next" id="next">›</div>
+
+<script>
+(function () {
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const deck = document.getElementById('deck');
+  const bar = document.getElementById('bar');
+  const counter = document.getElementById('counter');
+  let current = 0;
+  let overview = false;
+
+  function show(i) {
+    current = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+    bar.style.width = ((current + 1) / slides.length * 100) + '%';
+    counter.textContent = (current + 1) + ' / ' + slides.length;
+  }
+
+  function goOverview(on) {
+    overview = on;
+    document.body.classList.toggle('overview', on);
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+      e.preventDefault();
+      if (overview) { goOverview(false); return; }
+      show(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+      e.preventDefault();
+      if (overview) { goOverview(false); return; }
+      show(current - 1);
+    } else if (e.key === 'Home') { show(0); }
+    else if (e.key === 'End') { show(slides.length - 1); }
+    else if (e.key === 'o' || e.key === 'O') { goOverview(!overview); }
+    else if (e.key === 'Escape') { goOverview(false); }
+    else if (e.key === 'f' || e.key === 'F') {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen();
+    }
+  });
+
+  document.getElementById('next').addEventListener('click', function () { show(current + 1); });
+  document.getElementById('prev').addEventListener('click', function () { show(current - 1); });
+
+  deck.addEventListener('click', function (e) {
+    if (overview) {
+      const s = e.target.closest('.slide');
+      if (s) { show(slides.indexOf(s)); goOverview(false); }
+      return;
+    }
+    if (e.target.closest('.nav-arrow')) return;
+    const r = deck.getBoundingClientRect();
+    show(current + (e.clientX > r.left + r.width / 2 ? 1 : -1));
+  });
+
+  let tx = 0, ty = 0;
+  deck.addEventListener('touchstart', function (e) { tx = e.touches[0].clientX; ty = e.touches[0].clientY; }, { passive: true });
+  deck.addEventListener('touchend', function (e) {
+    const dx = e.changedTouches[0].clientX - tx;
+    const dy = e.changedTouches[0].clientY - ty;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) show(current + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  show(0);
+})();
+</script>
+</body>
+</html>

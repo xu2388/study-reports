@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第七章 · 网络优化与正则化 · 思维导图</title>
+<style>
+  /* ============ 主题变量 ============ */
+  :root {
+    --surface:    #ffffff;
+    --page:       #f4f5f7;
+    --ink:        #1a1a1a;
+    --ink-2:      #555555;
+    --muted:      #8a8a8a;
+    --line:       #d9dbe0;
+    --c1:#2a78d6; --c2:#e0652f; --c3:#12966b; --c4:#c99400; --c5:#d5507f; --c6:#5b4bb5; --c7:#0d8a0d; --c8:#d33a38;
+    --t1:#eaf2fc; --t2:#fdf0e7; --t3:#e8f6f0; --t4:#fbf4dd; --t5:#fbeaf1; --t6:#efecf9; --t7:#e7f3e7; --t8:#fbeaea;
+  }
+  html[data-theme="dark"] {
+    --surface:    #1c1c1b;
+    --page:       #101010;
+    --ink:        #f2f2f2;
+    --ink-2:      #bfbfb8;
+    --muted:      #8b8b86;
+    --line:       #34342f;
+    --c1:#4d92ec; --c2:#ef7a41; --c3:#1fb083; --c4:#dbaa17; --c5:#e16b97; --c6:#8b7eec; --c7:#2fa72f; --c8:#e86a68;
+    --t1:#13263e; --t2:#3b2415; --t3:#123126; --t4:#3b2e0e; --t5:#3a1c29; --t6:#262244; --t7:#123212; --t8:#3d1c1a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 26px 20px 70px; }
+
+  /* ============ 顶部 ============ */
+  .top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .title { font-size: 23px; font-weight: 800; letter-spacing: .5px; }
+  .title .tag { display: inline-block; vertical-align: 5px; margin-left: 10px; font-size: 12px; font-weight: 600;
+    color: var(--c1); background: var(--t1); border: 1px solid var(--line); border-radius: 999px; padding: 2px 12px; }
+  .subtitle { color: var(--ink-2); font-size: 13px; margin: 3px 0 0; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { appearance: none; border: 1px solid var(--line); background: var(--surface); color: var(--ink-2);
+    font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+  .btn:hover { color: var(--ink); border-color: var(--ink-2); }
+  .btn.primary { background: var(--c1); border-color: var(--c1); color: #fff; font-weight: 600; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 5px 18px; margin: 14px 0 4px; padding: 10px 14px;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+  .legend .lg { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; color: var(--ink-2); }
+  .legend .sw { width: 13px; height: 13px; border-radius: 4px; flex: none; }
+
+  /* ============ 根横幅 ============ */
+  .root { background: #141414; color: #fff; border-radius: 14px; padding: 18px 24px; margin: 10px 0 6px;
+    text-align: center; font-size: 20px; font-weight: 800; letter-spacing: 1px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.18); }
+  .root small { display: block; font-weight: 400; font-size: 12.5px; color: #a8a8a8; margin-top: 4px; letter-spacing: 0; }
+  html[data-theme="dark"] .root { background: #2c2c2a; box-shadow: 0 3px 14px rgba(0,0,0,.4); }
+
+  /* ============ 本章定位 ============ */
+  .preamble { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin: 10px 0 22px; }
+  .preamble .ph { font-weight: 700; font-size: 15px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .preamble .ph::before { content: ""; width: 10px; height: 18px; border-radius: 3px; background: #333; }
+  .preamble .row { display: flex; gap: 9px; padding: 3px 0; font-size: 13.5px; color: var(--ink-2); }
+  .preamble .row b { color: var(--ink); font-weight: 600; flex: none; min-width: 58px; }
+
+  /* ============ 一级区块 ============ */
+  section { margin: 18px 0; }
+  .sec-head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
+    border-radius: 11px; padding: 11px 18px; color: #fff; font-weight: 700; font-size: 16.5px;
+  }
+  .sec-head .no { font-size: 13px; font-weight: 800; background: rgba(255,255,255,.22); border-radius: 6px; padding: 2px 8px; }
+  .sec-head .ssub { font-size: 12.5px; font-weight: 400; opacity: .9; }
+  .s1 .sec-head { background: var(--c1); } .s2 .sec-head { background: var(--c2); }
+  .s3 .sec-head { background: var(--c3); } .s4 .sec-head { background: var(--c4); }
+  .s5 .sec-head { background: var(--c5); } .s6 .sec-head { background: var(--c6); }
+  .s7 .sec-head { background: var(--c7); } .s8 .sec-head { background: var(--c8); }
+  .s4 .sec-head { color: #3a2d00; } .s4 .sec-head .no { background: rgba(0,0,0,.15); }
+
+  .sec-body { margin: 8px 0 0 10px; padding: 2px 0 8px 22px; border-left: 3px solid; }
+  .s1 .sec-body { border-color: var(--c1); } .s2 .sec-body { border-color: var(--c2); }
+  .s3 .sec-body { border-color: var(--c3); } .s4 .sec-body { border-color: var(--c4); }
+  .s5 .sec-body { border-color: var(--c5); } .s6 .sec-body { border-color: var(--c6); }
+  .s7 .sec-body { border-color: var(--c7); } .s8 .sec-body { border-color: var(--c8); }
+
+  /* 一级区块下的直接知识点（叶子） */
+  .leaf { display: flex; gap: 10px; align-items: flex-start; padding: 5px 0; font-size: 14px; }
+  .leaf::before { content: ""; width: 10px; height: 10px; border-radius: 50%; margin-top: 8px; flex: none; background: var(--dotc, var(--ink)); }
+  .leaf .t { font-weight: 600; }
+  .leaf .d { color: var(--ink-2); }
+
+  /* ============ 二级分组（可折叠） ============ */
+  details.group { margin: 6px 0; }
+  details.group > summary {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; list-style: none;
+    font-weight: 700; font-size: 14.5px; padding: 8px 12px; border-radius: 9px;
+    border-left: 5px solid var(--gc); background: var(--gt); border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  }
+  details.group > summary::-webkit-details-marker { display: none; }
+  details.group > summary .caret { font-size: 11px; opacity: .6; transition: transform .15s; }
+  details.group[open] > summary .caret { transform: rotate(90deg); }
+  details.group > summary .hint { font-weight: 400; font-size: 12px; color: var(--muted); }
+  details.group > .gb { margin: 4px 0 8px 16px; padding-left: 18px; border-left: 2px dashed var(--gline, var(--line)); }
+
+  .s1 details.group { --gc: var(--c1); --gt: var(--t1); } .s2 details.group { --gc: var(--c2); --gt: var(--t2); }
+  .s3 details.group { --gc: var(--c3); --gt: var(--t3); } .s4 details.group { --gc: var(--c4); --gt: var(--t4); }
+  .s5 details.group { --gc: var(--c5); --gt: var(--t5); } .s6 details.group { --gc: var(--c6); --gt: var(--t6); }
+  .s7 details.group { --gc: var(--c7); --gt: var(--t7); } .s8 details.group { --gc: var(--c8); --gt: var(--t8); }
+
+  /* 叶子知识点（含所属区块色点） */
+  .s1 .leaf, .s1 .gb .leaf { --dotc: var(--c1); } .s2 .leaf, .s2 .gb .leaf { --dotc: var(--c2); }
+  .s3 .leaf, .s3 .gb .leaf { --dotc: var(--c3); } .s4 .leaf, .s4 .gb .leaf { --dotc: var(--c4); }
+  .s5 .leaf, .s5 .gb .leaf { --dotc: var(--c5); } .s6 .leaf, .s6 .gb .leaf { --dotc: var(--c6); }
+  .s7 .leaf, .s7 .gb .leaf { --dotc: var(--c7); } .s8 .leaf, .s8 .gb .leaf { --dotc: var(--c8); }
+
+  footer { margin-top: 30px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; line-height: 1.8; }
+  footer b { color: var(--ink-2); }
+
+  @media (max-width: 640px) {
+    .title { font-size: 19px; }
+    .sec-head { font-size: 15px; padding: 10px 14px; }
+    .sec-body { margin-left: 4px; padding-left: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="top">
+    <div>
+      <div class="title">网络优化与正则化 <span class="tag">第 7 章 · NNDL</span></div>
+      <div class="subtitle">邱锡鹏《神经网络与深度学习》· 思维导图（竖向展开版）</div>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="setAll(true)">全部展开</button>
+      <button class="btn" onclick="setAll(false)">全部收起</button>
+      <button class="btn primary" id="themeBtn" onclick="toggleTheme()">🌙 深色</button>
+    </div>
+  </div>
+
+  <div class="legend">
+    <span class="lg"><i class="sw" style="background:var(--c1)"></i>网络优化</span>
+    <span class="lg"><i class="sw" style="background:var(--c2)"></i>优化算法</span>
+    <span class="lg"><i class="sw" style="background:var(--c3)"></i>参数初始化</span>
+    <span class="lg"><i class="sw" style="background:var(--c4)"></i>数据预处理</span>
+    <span class="lg"><i class="sw" style="background:var(--c5)"></i>逐层规范化</span>
+    <span class="lg"><i class="sw" style="background:var(--c6)"></i>超参数优化</span>
+    <span class="lg"><i class="sw" style="background:var(--c7)"></i>网络正则化</span>
+    <span class="lg"><i class="sw" style="background:var(--c8)"></i>训练诊断</span>
+  </div>
+
+  <!-- 根 -->
+  <div class="root">第七章 · 网络优化与正则化<small>优化（找到好解）＋ 泛化（避免过拟合）</small></div>
+
+  <!-- 本章定位 -->
+  <div class="preamble">
+    <div class="ph">本章定位</div>
+    <div class="row"><b>优化问题</b><span>非凸函数、参数多、一阶优化收敛慢、梯度消失 / 爆炸</span></div>
+    <div class="row"><b>泛化问题</b><span>模型复杂度高、拟合能力强 → 过拟合</span></div>
+    <div class="row"><b>总目标</b><span>在表示能力、复杂度、学习效率、泛化能力之间找平衡</span></div>
+  </div>
+
+  <!-- ① 网络优化 -->
+  <section class="s1">
+    <div class="sec-head"><span class="no">①</span>网络优化<span class="ssub">让经验/结构风险最小化 · 非凸 + 高维优化问题</span></div>
+    <div class="sec-body">
+      <div class="leaf"><span class="t">网络结构多样性</span><span class="d">CNN / RNN / GNN 结构各异 → 无通用优化法；超参数多，挑战大</span></div>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>高维非凸优化<span class="hint">与低维不同，难点不是局部最优，而是逃离鞍点</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">鞍点</span><span class="d">梯度为 0 但非极值；高维中主要难点，随机梯度有助于逃离</span></div>
+          <div class="leaf"><span class="t">平坦 vs 尖锐最小值</span><span class="d">平坦更鲁棒、泛化更好</span></div>
+          <div class="leaf"><span class="t">局部最小解近似等价</span><span class="d">找泛化好的解，而非精确追求全局最优</span></div>
+          <div class="leaf"><span class="t">梯度消失 / 爆炸</span><span class="d">深度网络训练的主要难点</span></div>
+        </div>
+      </details>
+
+      <div class="leaf"><span class="t">改善方法</span><span class="d">更好的优化算法 · 更好的初始化/预处理 · 修改结构改善地形（ReLU/残差/规范化）· 超参数优化</span></div>
+    </div>
+  </section>
+
+  <!-- ② 优化算法 -->
+  <section class="s2">
+    <div class="sec-head"><span class="no">②</span>优化算法<span class="ssub">三大类：调学习率 · 修正梯度估计 · 利用结构/平坦性</span></div>
+    <div class="sec-body">
+      <details class="group" open>
+        <summary><span class="caret">▶</span>小批量梯度下降<span class="hint">Mini-Batch GD</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">批大小选择</span><span class="d">越大方差越小、越稳定，可配大学习率（线性缩放规则）</span></div>
+          <div class="leaf"><span class="t">大批量 → 尖锐最小值</span><span class="d">小批量 → 平坦最小值（泛化更好）</span></div>
+          <div class="leaf"><span class="t">梯度累积</span><span class="d">显存受限时，分小批累加梯度再更新，等价于大批量</span></div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>学习率调整<span class="hint">学习率过大不收敛、过小收敛慢</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">学习率衰减</span><span class="d">分段常数 / 逆时 / 指数 / 自然指数 / 余弦衰减</span></div>
+          <div class="leaf"><span class="t">学习率预热 Warmup</span><span class="d">初期小学习率再恢复，稳定大 batch 训练</span></div>
+          <div class="leaf"><span class="t">周期性调整</span><span class="d">循环学习率 · SGDR 带热重启的余弦衰减（助逃离尖锐/鞍点）</span></div>
+          <div class="leaf"><span class="t">自适应学习率</span><span class="d">AdaGrad / RMSprop / AdaDelta（每个参数单独调学习率）</span></div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>梯度估计修正<span class="hint">缓解随机梯度振荡，提高速度</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">动量法</span><span class="d">梯度的加权移动平均；方向一致时加速、振荡时减速</span></div>
+          <div class="leaf"><span class="t">Nesterov 加速</span><span class="d">在「预更新点」处计算梯度，前瞻一步</span></div>
+          <div class="leaf"><span class="t">Adam</span><span class="d">动量 + RMSprop，一阶/二阶矩 + 偏差修正</span></div>
+          <div class="leaf"><span class="t">Muon</span><span class="d">矩阵结构优化器：动量方向做正交化，配 AdamW 混用</span></div>
+          <div class="leaf"><span class="t">SAM</span><span class="d">最坏扰动附近最优化，倾向平坦最小值、兼顾泛化</span></div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>梯度截断<span class="hint">应对梯度爆炸</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">按值截断</span><span class="d">梯度钳制到 [a, b] 区间</span></div>
+          <div class="leaf"><span class="t">按模截断</span><span class="d">模超过阈值则整体缩放；RNN 训练常用</span></div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ③ 参数初始化 -->
+  <section class="s3">
+    <div class="sec-head"><span class="no">③</span>参数初始化<span class="ssub">初始值影响收敛效率与泛化能力</span></div>
+    <div class="sec-body">
+      <div class="leaf"><span class="t">预训练初始化</span><span class="d">大规模数据预训练 → 目标任务微调（Fine-Tuning）</span></div>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>随机初始化<span class="hint">打破「对称权重」现象（全 0 会导致神经元无区分性）</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">固定方差</span><span class="d">高斯分布 / 均匀分布采样</span></div>
+          <div class="leaf"><span class="t">Xavier 初始化</span><span class="d">按层神经元数缩放方差，适配 Sigmoid / Tanh</span></div>
+          <div class="leaf"><span class="t">He 初始化</span><span class="d">适配 ReLU（方差约为 Xavier 的 2 倍）</span></div>
+          <div class="leaf"><span class="t">正交初始化</span><span class="d">SVD 取正交矩阵 → 范数保持，防梯度消失/爆炸；RNN 常用</span></div>
+        </div>
+      </details>
+
+      <div class="leaf"><span class="t">固定值初始化</span><span class="d">偏置按经验设置：LSTM 遗忘门 = 1~2、ReLU 神经元 = 0.01</span></div>
+    </div>
+  </section>
+
+  <!-- ④ 数据预处理 -->
+  <section class="s4">
+    <div class="sec-head"><span class="no">④</span>数据预处理<span class="ssub">特征尺度差异大 → 梯度下降效率差</span></div>
+    <div class="sec-body">
+      <div class="leaf"><span class="t">最小最大值规范化</span><span class="d">把特征映射到 [0, 1]</span></div>
+      <div class="leaf"><span class="t">标准化 Z-score</span><span class="d">调整为均值 0、方差 1</span></div>
+      <div class="leaf"><span class="t">白化</span><span class="d">PCA 去除特征间相关性，同方差</span></div>
+    </div>
+  </section>
+
+  <!-- ⑤ 逐层规范化 -->
+  <section class="s5">
+    <div class="sec-head"><span class="no">⑤</span>逐层规范化<span class="ssub">对隐藏层输入规范化 → 训练更稳定高效</span></div>
+    <div class="sec-body">
+      <div class="leaf"><span class="t">作用</span><span class="d">缓解内部协变量偏移 · 平滑优化地形 · 允许更大学习率</span></div>
+      <div class="leaf"><span class="t">批量规范化 BN</span><span class="d">按小批量对单个神经元规范化；CNN / 大批量场景</span></div>
+      <div class="leaf"><span class="t">层规范化 LN</span><span class="d">对整层所有神经元规范化；RNN / Transformer / 小批量</span></div>
+      <div class="leaf"><span class="t">RMS 规范化</span><span class="d">省去减均值，只按 RMS 缩放；现代大模型常用</span></div>
+      <div class="leaf"><span class="t">权重规范化</span><span class="d">重参数化：把权重分解为「长度 + 方向」</span></div>
+      <div class="leaf"><span class="t">局部响应规范化 LRN</span><span class="d">AlexNet 早期方法，现已少用</span></div>
+    </div>
+  </section>
+
+  <!-- ⑥ 超参数优化 -->
+  <section class="s6">
+    <div class="sec-head"><span class="no">⑥</span>超参数优化<span class="ssub">组合优化问题 · 单次评估代价高</span></div>
+    <div class="sec-body">
+      <div class="leaf"><span class="t">网格搜索</span><span class="d">穷举所有组合，效率低</span></div>
+      <div class="leaf"><span class="t">随机搜索</span><span class="d">随机组合采样，实践中常优于网格</span></div>
+      <div class="leaf"><span class="t">贝叶斯优化</span><span class="d">高斯过程建模 + 收益函数（EI 等）· SMBO</span></div>
+      <div class="leaf"><span class="t">动态资源分配</span><span class="d">逐次减半 Successive Halving · HyperBand</span></div>
+      <div class="leaf"><span class="t">神经架构搜索 NAS</span><span class="d">RL 控制器自动生成网络架构</span></div>
+    </div>
+  </section>
+
+  <!-- ⑦ 网络正则化 -->
+  <section class="s7">
+    <div class="sec-head"><span class="no">⑦</span>网络正则化<span class="ssub">限制模型复杂度 · 提高泛化能力 · 避免过拟合</span></div>
+    <div class="sec-body">
+      <details class="group" open>
+        <summary><span class="caret">▶</span>参数约束类<span class="hint">传统机器学习常用</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">ℓ1 正则化</span><span class="d">促使参数稀疏</span></div>
+          <div class="leaf"><span class="t">ℓ2 正则化</span><span class="d">抑制参数过大</span></div>
+          <div class="leaf"><span class="t">弹性网络</span><span class="d">ℓ1 + ℓ2 折中</span></div>
+          <div class="leaf"><span class="t">权重衰减</span><span class="d">参数更新乘 (1−β)；标准 SGD 下与 ℓ2 等价</span></div>
+          <div class="leaf"><span class="t">AdamW</span><span class="d">解耦权重衰减（与「Adam + ℓ2」不等价，泛化更好）</span></div>
+        </div>
+      </details>
+
+      <div class="leaf"><span class="t">提前停止</span><span class="d">Early Stopping：验证集错误不再下降即停止迭代</span></div>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>暂退法 Dropout<span class="hint">随机屏蔽部分神经元输出</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">反向缩放</span><span class="d">训练时除以 p、测试时不变，期望尺度一致</span></div>
+          <div class="leaf"><span class="t">集成学习解释</span><span class="d">每次采样不同子网络，≈ 指数级子网络的集成</span></div>
+          <div class="leaf"><span class="t">贝叶斯学习解释</span><span class="d">对参数分布的近似采样</span></div>
+          <div class="leaf"><span class="t">RNN 用法</span><span class="d">只屏蔽非循环连接，或变分暂退法（时间维共享掩码）</span></div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>数据增强<span class="hint">提高样本多样性、增强鲁棒性</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">几何变换 / 噪声</span><span class="d">旋转 · 翻转 · 缩放 · 平移 · 加噪声</span></div>
+          <div class="leaf"><span class="t">mixup</span><span class="d">两个样本及标签做凸组合</span></div>
+          <div class="leaf"><span class="t">CutMix</span><span class="d">局部区域替换 + 按面积比例混合标签</span></div>
+        </div>
+      </details>
+
+      <details class="group" open>
+        <summary><span class="caret">▶</span>标签平滑<span class="hint">给 one-hot 标签加入噪声 → 软目标</span></summary>
+        <div class="gb">
+          <div class="leaf"><span class="t">软目标</span><span class="d">避免模型过于自信、改善概率校准</span></div>
+          <div class="leaf"><span class="t">知识蒸馏</span><span class="d">教师网络的软标签 → 训练学生网络</span></div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- ⑧ 训练过程诊断 -->
+  <section class="s8">
+    <div class="sec-head"><span class="no">⑧</span>训练过程诊断<span class="ssub">观察损失 / 梯度 / 参数范数 / 置信度，定位问题</span></div>
+    <div class="sec-body">
+      <div class="leaf"><span class="t">训练+验证损失都高</span><span class="d">→ 容量不足：增大模型/步数，调初始化与预处理</span></div>
+      <div class="leaf"><span class="t">训练低、验证高</span><span class="d">→ 过拟合/数据泄漏：加强正则化，检查数据划分</span></div>
+      <div class="leaf"><span class="t">损失振荡 / NaN</span><span class="d">→ 学习率过大/梯度爆炸：预热、梯度截断、混合精度</span></div>
+      <div class="leaf"><span class="t">准确率高但置信度不可靠</span><span class="d">→ 校准问题：标签平滑、温度缩放</span></div>
+      <div class="leaf"><span class="t">数据使用边界</span><span class="d">训练集调参 / 验证集选模型 / 测试集仅做最终评估</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <b>默认训练配方：</b>合适的参数初始化 + 数据预处理 → <b>AdamW + 学习率预热 + 余弦衰减</b> → 按需加入规范化、权重衰减、数据增强、标签平滑。<br>
+    提示：点「▶」旁的<b>分组标题</b>可折叠/展开该分支；所有内容默认展开，直接向下滚动即可浏览全部知识点。
+  </footer>
+</div>
+
+<script>
+  function setAll(open) {
+    document.querySelectorAll('details.group').forEach(function (d) { d.open = open; });
+  }
+  function toggleTheme() {
+    var root = document.documentElement, btn = document.getElementById('themeBtn');
+    if (root.getAttribute('data-theme') === 'dark') {
+      root.removeAttribute('data-theme'); btn.textContent = '🌙 深色';
+    } else {
+      root.setAttribute('data-theme', 'dark'); btn.textContent = '☀️ 浅色';
+    }
+  }
+</script>
+</body>
+</html>
